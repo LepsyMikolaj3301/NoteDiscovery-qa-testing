@@ -13,12 +13,29 @@ import re
 from html import escape
 from pathlib import Path
 from typing import Optional, Tuple
+from urllib.parse import quote
 import mimetypes
 
 # Import shared media type definitions and scanner from utils to avoid duplication
 from backend.utils import MEDIA_EXTENSIONS, get_media_type, scan_notes_fast_walk
 
 logger = logging.getLogger("uvicorn.error")
+
+
+def attachment_content_disposition(filename: str) -> str:
+    """
+    Content-Disposition for a downloaded file.
+
+    Same rule as Starlette's FileResponse, which the zip archive already uses.
+    A name that can sit in an HTTP header unchanged stays in filename="...".
+    Anything else (a space, an accent, text outside Latin-1) is sent as
+    filename*=utf-8''... so the header stays Latin-1 and the browser keeps
+    the original name.
+    """
+    encoded = quote(filename)
+    if encoded != filename:
+        return f"attachment; filename*=utf-8''{encoded}"
+    return f'attachment; filename="{filename}"'
 
 # Same stylesheet as the in-app preview pane. Inlined so downloaded HTML stays
 # standalone, and so shared notes cannot drift from what the author sees.

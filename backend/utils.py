@@ -458,6 +458,9 @@ def move_note(notes_dir: str, old_path: str, new_path: str) -> tuple[bool, str]:
         return False, f"Source note does not exist: {old_path}"
     if new_full_path.exists():
         return False, f"A note already exists at: {new_path}"
+    conflict = note_name_conflict(notes_dir, new_path)
+    if conflict and _normalized_rel_path(conflict).lower() != _normalized_rel_path(old_path).lower():
+        return False, f"A note already exists at: {conflict}"
 
     _drop_path_caches(old_full_path)
 
@@ -485,6 +488,9 @@ def move_folder(notes_dir: str, old_path: str, new_path: str) -> tuple[bool, str
         return False, f"Source folder does not exist: {old_path}"
     if new_full_path.exists():
         return False, f"A folder already exists at: {new_path}"
+    conflict = folder_name_conflict(notes_dir, new_path)
+    if conflict and _normalized_rel_path(conflict).lower() != _normalized_rel_path(old_path).lower():
+        return False, f"A folder already exists at: {conflict}"
 
     _drop_prefix_caches(old_full_path)
 
@@ -561,6 +567,146 @@ def get_note_content(notes_dir: str, note_path: str) -> Optional[str]:
     
     with open(full_path, 'r', encoding='utf-8') as f:
         return f.read()
+
+
+def _normalized_rel_path(path: str) -> str:
+    return path.replace('\\', '/').strip('/')
+
+
+def _directory_entries(parent: Path):
+    try:
+        return list(parent.iterdir())
+    except OSError:
+        return []
+
+
+def _matching_child(parent: Path, name: str, *, want_dir: bool) -> Optional[str]:
+    """On-disk name of the child `name` refers to.
+
+    An exact name wins. Otherwise a sibling that differs only by case, when it
+    is the same kind of entry (file or directory). Symlinks are ignored.
+    Returns None when nothing in the directory matches.
+    """
+    if not parent.is_dir():
+        return None
+    folded = name.lower()
+    fallback = None
+    for entry in _directory_entries(parent):
+        try:
+            if entry.is_symlink():
+                continue
+            if want_dir != entry.is_dir():
+                continue
+        except OSError:
+            continue
+        if entry.name == name:
+            return entry.name
+        if entry.name.lower() == folded:
+            fallback = entry.name
+    return fallback
+
+
+def _resolve_existing_dir(root: Path, rel_dir: str) -> Optional[Path]:
+    """Walk `rel_dir` from `root`, following a case-only match. None if a segment is missing."""
+    current = root
+    if not rel_dir:
+        return current
+    for part in rel_dir.split('/'):
+        if not part or part == '.':
+            continue
+        match = _matching_child(current, part, want_dir=True)
+        if match is None:
+            return None
+        current = current / match
+    return current
+
+
+def note_name_conflict(notes_dir: str, note_path: str) -> Optional[str]:
+    """Existing note path that this path would hit, when the names differ by case.
+
+    An exact on-disk name is not a conflict: that write is an update of the same
+    note. A missing parent is not a conflict either. The path must stay inside
+    the notes directory.
+    """
+    normalized = _normalized_rel_path(note_path)
+    if not normalized.lower().endswith('.md'):
+        normalized += '.md'
+    full = Path(notes_dir) / normalized
+    if not validate_path_security(notes_dir, full):
+        return None
+    parent_rel, _, name = normalized.rpartition('/')
+    parent = _resolve_existing_dir(Path(notes_dir), parent_rel)
+    if parent is None:
+        return None
+    match = _matching_child(parent, name, want_dir=False)
+    if match is None or match == name:
+        return None
+    try:
+        real_parent = parent.relative_to(Path(notes_dir)).as_posix()
+    except ValueError:
+        real_parent = parent_rel
+    if real_parent == '.':
+        real_parent = ''
+    return f'{real_parent}/{match}' if real_parent else match
+
+
+def folder_name_conflict(notes_dir: str, folder_path: str) -> Optional[str]:
+    """Existing folder path that differs from `folder_path` only by case, or None."""
+    normalized = _normalized_rel_path(folder_path)
+    if not normalized:
+        return None
+    full = Path(notes_dir) / normalized
+    if not validate_path_security(notes_dir, full):
+        return None
+    root = Path(notes_dir)
+    current = root
+    resolved: list[str] = []
+    for part in normalized.split('/'):
+        match = _matching_child(current, part, want_dir=True)
+        if match is None:
+            return None
+        resolved.append(match)
+        current = current / match
+        if match != part:
+            return '/'.join(resolved)
+    return None
+
+
+def path_has_hash(path: str) -> bool:
+    """True when a note or folder name uses `#`, which heading links already own."""
+    return any('#' in part for part in _normalized_rel_path(path).split('/') if part)
+
+
+def note_exists_exact(notes_dir: str, note_path: str) -> bool:
+    """True when a note is stored under this exact path, not merely a different case."""
+    normalized = _normalized_rel_path(note_path)
+    if not normalized.lower().endswith('.md'):
+        normalized += '.md'
+    full = Path(notes_dir) / normalized
+    if not validate_path_security(notes_dir, full):
+        return False
+    parent_rel, _, name = normalized.rpartition('/')
+    parent = _resolve_existing_dir(Path(notes_dir), parent_rel)
+    if parent is None:
+        return False
+    return _matching_child(parent, name, want_dir=False) == name
+
+
+def folder_exists_exact(notes_dir: str, folder_path: str) -> bool:
+    """True when every segment of the folder path matches a directory name exactly."""
+    normalized = _normalized_rel_path(folder_path)
+    if not normalized:
+        return False
+    full = Path(notes_dir) / normalized
+    if not validate_path_security(notes_dir, full):
+        return False
+    current = Path(notes_dir)
+    for part in normalized.split('/'):
+        match = _matching_child(current, part, want_dir=True)
+        if match != part:
+            return False
+        current = current / match
+    return True
 
 
 def save_note(notes_dir: str, note_path: str, content: str) -> bool:

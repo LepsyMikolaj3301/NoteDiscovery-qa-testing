@@ -378,6 +378,27 @@ def get_share_info(data_dir: str, note_path: str) -> Optional[Dict[str, Any]]:
     return {'shared': False}
 
 
+def _normalize_storage_path(path: str) -> str:
+    """Forward slashes, no leading or trailing slash."""
+    return path.replace("\\", "/").strip("/")
+
+
+def _retarget_note_path(path: str, old_prefix: str, new_prefix: str) -> Optional[str]:
+    """
+    Return the note path after a folder rename, or None if this note is outside the folder.
+
+    `projects` must not match `projects-archive/note.md`. Only an exact path or a
+    path under `old_prefix/` moves.
+    """
+    if path == old_prefix:
+        return new_prefix
+    marker = old_prefix + "/"
+    if path.startswith(marker):
+        rest = path[len(marker):]
+        return f"{new_prefix}/{rest}" if new_prefix else rest
+    return None
+
+
 def update_token_path(data_dir: str, old_path: str, new_path: str) -> bool:
     """
     Update the path for a token when a note is moved/renamed.
@@ -399,6 +420,47 @@ def update_token_path(data_dir: str, old_path: str, new_path: str) -> bool:
                 return save_tokens(data_dir, tokens)
         
         return False
+
+
+def update_token_prefix(data_dir: str, old_prefix: str, new_prefix: str) -> int:
+    """
+    Rewrite share token paths when a folder is renamed or moved.
+
+    Every token whose note lives in that folder (or a nested folder) keeps its
+    token and theme; only the stored path changes. Returns how many tokens were
+    updated. An empty old prefix matches nothing, so a bad caller cannot rewrite
+    every link in the vault.
+    """
+    old_prefix = _normalize_storage_path(old_prefix)
+    new_prefix = _normalize_storage_path(new_prefix)
+    if not old_prefix or old_prefix == new_prefix:
+        return 0
+
+    with _lock:
+        tokens = load_tokens(data_dir)
+        changed = 0
+        for info in tokens.values():
+            path = info.get("path")
+            if not isinstance(path, str) or not path:
+                continue
+            rewritten = _retarget_note_path(
+                _normalize_storage_path(path), old_prefix, new_prefix
+            )
+            if rewritten is None or rewritten == path:
+                continue
+            info["path"] = rewritten
+            changed += 1
+        if not changed:
+            return 0
+        if not save_tokens(data_dir, tokens):
+            return 0
+        logger.info(
+            "Updated %s share token path(s) for folder move %s -> %s",
+            changed,
+            old_prefix,
+            new_prefix,
+        )
+        return changed
 
 
 def delete_token_for_note(data_dir: str, note_path: str) -> bool:
