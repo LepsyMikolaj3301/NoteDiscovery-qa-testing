@@ -556,6 +556,27 @@ class MCPServer:
         
         return f"✅ Content appended to: {path}"
     
+    def _tool_edit_note(self, args: dict) -> str:
+        """Replace one exact occurrence of a text in an existing note."""
+        path = args.get("path", "")
+        old_str = args.get("old_str", "")
+        new_str = args.get("new_str")
+        
+        is_valid, error = self._validate_path(path)
+        if not is_valid:
+            return f"Error: {error}"
+        if not old_str:
+            return "Error: old_str is required"
+        if new_str is None:
+            return "Error: new_str is required (use an empty string to delete)"
+        
+        response = self.client.edit_note(path, old_str, new_str)
+        
+        if not response.success:
+            return f"Failed to edit note: {response.error}"
+        
+        return f"✅ Note edited: {path}"
+    
     def _tool_move_note(self, args: dict) -> str:
         """Move or rename a note."""
         old_path = args.get("old_path", "")

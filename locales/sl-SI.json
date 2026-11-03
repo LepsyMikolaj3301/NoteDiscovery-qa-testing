@@ -98,7 +98,12 @@
     "not_found": "Zapisa ni mogoče najti: {{path}}",
     "create_from_link": "Zapis \"{{path}}\" ne obstaja.\n\nAli ga želite ustvariti?",
     "no_content": "Ni vsebine za izvoz",
-    "open_first": "Prosimo, najprej odprite zapis, preden naložite slike."
+    "open_first": "Prosimo, najprej odprite zapis, preden naložite slike.",
+    "save_conflict_title": "Zapis spremenjen drugje",
+    "save_conflict_message": "Zapis \"{{name}}\" se je na disku spremenil, odkar ste ga odprli: vanj je pisal drug zavihek, orodje za sinhronizacijo ali agent UI.\n\nZnova naloži prikaže različico z diska; neshranjene spremembe bodo zavržene.\nPrepiši shrani vašo različico namesto njihove.",
+    "save_conflict_overwrite": "Prepiši",
+    "save_conflict_reload": "Znova naloži",
+    "save_conflict_unsaved": "\"{{name}}\": vaše zadnje spremembe niso bile shranjene, zapis se je spremenil drugje."
   },
   "folders": {
     "confirm_delete": "⚠️ OPOZORILO ⚠️\n\nAli ste prepričani, da želite izbrisati mapo \"{{name}}\"?\n\nTo bo TRAJNO izbrisalo:\n• Vse zapiske v tej mapi\n• Vse podmape in njihovo vsebino\n\nTe akcije NI mogoče preklicati!",
@@ -280,7 +285,7 @@
     "readable_line_length": "Berljiva dolžina vrstice",
     "readable_line_length_desc": "Omejite širino predogleda za lažje branje",
     "hide_underscore_folders": "Skrij sistemske mape",
-    "hide_underscore_folders_desc": "Skrij _attachments, _templates in druge mape s podčrtajem",
+    "hide_underscore_folders_desc": "Skrij _attachments, _templates in druge mape s podčrtajem v stranski vrstici in na grafu",
     "tab_inserts_tab": "Tipka Tab vstavi tabulator",
     "tab_inserts_tab_desc": "Pritisnite Tab za vstavljanje tabulatorja namesto premikanja fokusa",
     "new_button_action": "Ko kliknete +",
@@ -291,9 +296,7 @@
     "new_button_option_template": "Nova zabeležka iz predloge",
     "new_button_option_drawing": "Nova risba",
     "auto_fill_note_title": "Časovni žig v naslovu",
-    "auto_fill_note_title_desc": "llllmmddUUMMSS. Enter potrdi, tipkanje zamenja.",
-    "smart_scroll_sync": "Pametna sinhronizacija drsenja",
-    "smart_scroll_sync_desc": "Poravna naslove, slike in tabele med podoknoma. Izklopljeno: odstotkovno drsenje."
+    "auto_fill_note_title_desc": "llllmmddUUMMSS. Enter potrdi, tipkanje zamenja."
   },
   "homepage": {
     "title": "Domov",

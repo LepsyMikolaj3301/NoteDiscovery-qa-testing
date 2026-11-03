@@ -98,7 +98,12 @@
     "not_found": "Nota non trovata: {{path}}",
     "create_from_link": "La nota \"{{path}}\" non esiste.\n\nVuoi crearla?",
     "no_content": "Nessun contenuto da esportare",
-    "open_first": "Apri prima una nota per caricare immagini."
+    "open_first": "Apri prima una nota per caricare immagini.",
+    "save_conflict_title": "Nota modificata altrove",
+    "save_conflict_message": "\"{{name}}\" è cambiata sul disco da quando l'hai aperta: un'altra scheda, uno strumento di sincronizzazione o un agente IA ci ha scritto.\n\nRicarica mostra la versione sul disco; le modifiche non salvate vengono scartate.\nSovrascrivi salva la tua versione al posto della loro.",
+    "save_conflict_overwrite": "Sovrascrivi",
+    "save_conflict_reload": "Ricarica",
+    "save_conflict_unsaved": "\"{{name}}\": le ultime modifiche non sono state salvate, la nota è cambiata altrove."
   },
   "folders": {
     "confirm_delete": "⚠️ ATTENZIONE ⚠️\n\nSei sicuro di voler eliminare la cartella \"{{name}}\"?\n\nQuesto eliminerà PERMANENTEMENTE:\n• Tutte le note in questa cartella\n• Tutte le sottocartelle e i loro contenuti\n\nQuesta azione NON PUÒ essere annullata!",
@@ -280,7 +285,7 @@
     "readable_line_length": "Larghezza riga leggibile",
     "readable_line_length_desc": "Limita la larghezza dell'anteprima per una lettura più facile",
     "hide_underscore_folders": "Nascondi cartelle di sistema",
-    "hide_underscore_folders_desc": "Nascondi _attachments, _templates e altre cartelle con underscore",
+    "hide_underscore_folders_desc": "Nascondi _attachments, _templates e altre cartelle con underscore dalla barra laterale e dal grafo",
     "tab_inserts_tab": "Tab inserisce tabulazione",
     "tab_inserts_tab_desc": "Premi Tab per inserire una tabulazione invece di cambiare focus",
     "new_button_action": "Quando clicchi su +",
@@ -291,9 +296,7 @@
     "new_button_option_template": "Nuova nota da modello",
     "new_button_option_drawing": "Nuovo disegno",
     "auto_fill_note_title": "Compila titolo con timestamp",
-    "auto_fill_note_title_desc": "aaaammddHHMMSS. Invio accetta, digita per sostituire.",
-    "smart_scroll_sync": "Sincronizzazione intelligente",
-    "smart_scroll_sync_desc": "Allinea titoli, immagini e tabelle tra i pannelli. Disattivato: scorrimento percentuale."
+    "auto_fill_note_title_desc": "aaaammddHHMMSS. Invio accetta, digita per sostituire."
   },
   "homepage": {
     "title": "Home",

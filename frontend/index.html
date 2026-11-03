@@ -57,6 +57,33 @@
         })();
     </script>
     
+    <!-- Preload the theme before Alpine renders, so a reload doesn't flash.
+         A saved preference wins; otherwise the configured default (__DEFAULT_THEME__).
+         data-theme is set only after the CSS is parsed and inserted. app.js reuses
+         #dynamic-theme and skips a second download when the id still matches. -->
+    <script>
+        (function() {
+            try {
+                const themeId = localStorage.getItem('noteDiscoveryTheme') || '__DEFAULT_THEME__';
+                if (!themeId) return;
+                const xhr = new XMLHttpRequest();
+                xhr.open('GET', '/api/themes/' + encodeURIComponent(themeId), false);
+                xhr.send();
+                if (xhr.status !== 200) return;
+                const css = JSON.parse(xhr.responseText).css;
+                if (typeof css !== 'string' || !css) return;
+                const styleEl = document.createElement('style');
+                styleEl.id = 'dynamic-theme';
+                styleEl.textContent = css;
+                document.head.appendChild(styleEl);
+                document.documentElement.setAttribute('data-theme', themeId);
+            } catch (e) {
+                // Fall back to the normal async applyTheme() path in app.js
+                console.error('Failed to preload theme:', e);
+            }
+        })();
+    </script>
+    
     <script defer src="/static/vendor/alpinejs/cdn.min.js"></script>
     <script src="/static/vendor/marked/marked.min.js"></script>
     
@@ -376,6 +403,43 @@
         /* Link drop zone cursor */
         .editor-textarea.link-drop-target {
             cursor: copy !important;
+        }
+
+        /* Wikilink / media autocomplete popup */
+        .wikilink-autocomplete {
+            min-width: 220px;
+            max-width: 360px;
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-primary);
+            border-radius: 6px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+            padding: 4px;
+            overflow: hidden;
+        }
+        .wikilink-autocomplete-item {
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+            padding: 5px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        .wikilink-autocomplete-item.active {
+            background-color: var(--bg-hover);
+        }
+        .wikilink-autocomplete-item .wl-label {
+            color: var(--text-primary);
+            font-size: 13px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .wikilink-autocomplete-item .wl-secondary {
+            color: var(--text-tertiary);
+            font-size: 11px;
+            margin-left: auto;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
         
         /* Folder tree styling - compact Obsidian-like */
@@ -1916,23 +1980,6 @@
                                     </label>
                                     <p class="text-xs mt-1" style="color: var(--text-tertiary);" x-text="t('settings.auto_fill_note_title_desc')"></p>
                                 </div>
-
-                                <div class="mb-4">
-                                    <label class="flex items-center justify-between gap-3 cursor-pointer">
-                                        <span class="text-xs font-medium flex-1 min-w-0" style="color: var(--text-secondary);" x-text="t('settings.smart_scroll_sync')"></span>
-                                        <div
-                                            @click="smartScrollSync = !smartScrollSync; localStorage.setItem('smartScrollSync', smartScrollSync)"
-                                            class="relative w-10 h-5 rounded-full transition-colors cursor-pointer flex-shrink-0"
-                                            :style="smartScrollSync ? 'background-color: var(--accent-primary)' : 'background-color: var(--bg-tertiary)'"
-                                        >
-                                            <div
-                                                class="absolute top-0.5 left-0.5 w-4 h-4 rounded-full transition-transform"
-                                                :style="'background-color: var(--bg-primary);' + (smartScrollSync ? ' transform: translateX(20px);' : '')"
-                                            ></div>
-                                        </div>
-                                    </label>
-                                    <p class="text-xs mt-1" style="color: var(--text-tertiary);" x-text="t('settings.smart_scroll_sync_desc')"></p>
-                                </div>
                                 
                                 <!-- Logout (if auth enabled) - uses authEnabled from main app state -->
                                 <div x-show="authEnabled" class="mb-4">
@@ -2818,10 +2865,13 @@
                                 <textarea
                                     id="note-editor"
                                     x-model="noteContent"
-                                    @input="autoSave(); updateSyntaxHighlight()"
+                                    @keydown="wlOnKeydown($event)"
+                                    @input="autoSave(); updateSyntaxHighlight(); wlDetectToken()"
                                     @scroll="syncOverlayScroll()"
                                     @keydown.enter="handleEditorEnterKey($event)"
                                     @keydown.tab="handleTabKey($event)"
+                                    @click="wlDetectToken()"
+                                    @blur="wlClose()"
                                     @dblclick="trimSelectionTrailingSpace($event)"
                                     @drop="onEditorDrop($event)"
                                     @dragover.prevent="onEditorDragOver($event)"
@@ -3296,7 +3346,24 @@
             </button>
         </div>
     </div>
-    
+
+    <!-- Wikilink / media autocomplete popup -->
+    <div x-show="wikilinkAutocomplete.open"
+         @mousedown.prevent
+         class="wikilink-autocomplete"
+         :style="`position: fixed; top: ${wikilinkAutocomplete.position.top}px; left: ${wikilinkAutocomplete.position.left}px; z-index: 1200;`"
+         x-cloak>
+        <template x-for="(item, idx) in wikilinkAutocomplete.items" :key="item.insert + idx">
+            <div class="wikilink-autocomplete-item"
+                 :class="{'active': idx === wikilinkAutocomplete.activeIndex}"
+                 @mouseenter="wikilinkAutocomplete.activeIndex = idx"
+                 @click="wlAccept(item)">
+                <span class="wl-label" x-text="item.label"></span>
+                <span class="wl-secondary" x-show="item.secondary" x-text="item.secondary"></span>
+            </div>
+        </template>
+    </div>
+
     <!-- Template Selection Modal -->
     <div x-show="showTemplateModal" 
          @click.self="showTemplateModal = false; selectedTemplate = ''; newTemplateNoteName = ''"

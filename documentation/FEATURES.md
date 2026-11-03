@@ -6,6 +6,7 @@
 - **Rich markdown editor** with live preview
 - **Three view modes**: Edit, Split, Preview
 - **Auto-save** - Never lose your work
+- **Save conflict check** - If the file changed on disk since you opened it (another tab, a sync tool, an AI agent), saving asks whether to reload it or overwrite it instead of silently replacing the other change
 - **Resume where you left off** - Editor scroll position is remembered per note within the session, so switching back to a long note returns you to the same spot
 - **Undo/Redo** - Ctrl+Z / Ctrl+Y support
 - **Note templates** - Create notes from templates with dynamic placeholders
@@ -36,7 +37,7 @@
 - **Flexible sorting** - Sort notes by name (A-Z, Z-A), date (newest, oldest), or size (largest, smallest)
 - **Rename anything** - Files and folders, instantly
 - **Visual tree view** - Expandable/collapsible navigation
-- **Hide system folders** - Toggle to hide `_attachments`, `_templates` and other underscore-prefixed folders from sidebar
+- **Hide system folders** - Toggle to hide `_attachments`, `_templates` and other underscore-prefixed folders from the sidebar and the graph
 - **Tab inserts tab** - Toggle so Tab inserts a literal tab in the editor instead of changing focus; when this is on, Shift+Tab outdents (one leading tab or up to four leading spaces per line in the selection), and if nothing is removed, Shift+Tab still moves focus backward
 - **List & quote continuation (Enter)** - At the end of a line, Enter continues blockquotes (`>`), bullets (`-` / `*` / `+`), ordered lists (`1.` / `1)`), and task lists (`- [ ]` / `- [x]`); pressing Enter again on an empty continued line exits the list or quote. Disabled inside fenced code blocks and when using Shift+Enter (plain newline)
 
@@ -60,13 +61,14 @@ For file naming, API notes, and more: **[DRAWING.md](DRAWING.md)**
 ## 🔗 Linking & Discovery
 
 ### Graph View
-- **Interactive graph** - Visualize all your notes and their connections
+- **Interactive graph** - Visualize your notes and their connections. While Hide system folders is on, notes inside a folder whose name starts with `_` are left off the map (`_templates/meeting.md`, `_attachments/readme.md`, and `work/_documentation/intro.md` are the same case)
 - **Navigate with mouse** - Drag to pan, scroll to zoom, double-click nodes to open notes
 - **Multiple link types** - See wikilinks and markdown links distinguished by color
 - **Theme-aware** - Graph colors adapt to your current theme
 
 ### Internal Links
 - **Wikilinks** - `[[Note Name]]` Obsidian-style syntax for quick linking
+- **Wikilink autocomplete** - Typing `[[` suggests notes and `![[` suggests media from the vault. Arrow keys move through the list, Enter or Tab inserts the link, Esc dismisses it
 - **Wikilinks with display text** - `[[Note Name|Click here]]` to customize link text
 - **Section anchors** - `[[Note Name#heading]]` to link directly to a heading
 - **Same-page anchors** - `[[#heading]]` to link within the current note
@@ -124,7 +126,7 @@ To link to a heading, convert the heading text to a slug: **lowercase, spaces �
 - **Resizable sidebar** - Drag to adjust width
 - **Collapsible sidebar panel** - Show/hide the sidebar contents while keeping the icon rail in place
 - **View mode memory** - Remembers Edit/Split/Preview preference
-- **Smart scroll sync** - Optional (**Settings → Smart scroll sync**, off by default): aligns headings, images, tables and code blocks between the editor and preview panes instead of scrolling both by percentage
+- **Smart scroll sync** - Aligns headings, images, tables and code blocks between the editor and preview panes
 - **Responsive design** - Works on all screen sizes
 
 ## 📊 Note Statistics
@@ -209,6 +211,7 @@ items:                         # YAML list format
 ### Text Search
 - **Content-only** - Searches note contents (not file/folder names)
 - **Partial words** - Case-insensitive substring match, so `feat` finds `Features`
+- **Accents optional** - `esparragos` finds `Espárragos`, `garantia` finds `garantía`
 - **Real-time results** - As you type
 - **Highlight matches** - See context in results
 - **In-note highlighting** - Search terms highlighted in open notes

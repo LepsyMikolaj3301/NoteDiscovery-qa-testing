@@ -227,6 +227,24 @@ class NoteDiscoveryClient:
             data={"content": content, "add_timestamp": add_timestamp}
         )
     
+    def edit_note(self, path: str, old_str: str, new_str: str) -> APIResponse:
+        """
+        Replace one exact occurrence of a text in an existing note.
+        
+        Args:
+            path: Note path
+            old_str: Text to replace (must appear exactly once)
+            new_str: Replacement text
+            
+        Returns:
+            APIResponse with edit result
+        """
+        return self._request(
+            "POST",
+            "/api/notes/replace",
+            data={"path": path, "old_str": old_str, "new_str": new_str}
+        )
+    
     def move_note(self, old_path: str, new_path: str) -> APIResponse:
         """
         Move or rename a note.

@@ -53,6 +53,7 @@ curl http://localhost:8000/api/notes/folder/mynote.md
 {
   "path": "folder/mynote.md",
   "content": "# My Note\n\nNote content here...",
+  "hash": "9f2c…e41a",
   "metadata": {
     "created": "2026-03-15T10:00:00+01:00",
     "modified": "2026-03-17T14:30:00+01:00",
@@ -86,6 +87,8 @@ curl http://localhost:8000/api/notes/folder/mynote.md
 | `references[].context` | Text snippet around the link |
 | `references[].type` | Link type: `wikilink` or `markdown` |
 
+`hash` is the SHA-256 of the note as stored on disk (before any `on_note_load` plugin transforms it). Send it back as `base_hash` when saving to detect changes made in the meantime.
+
 **Without Backlinks:**
 ```bash
 curl "http://localhost:8000/api/notes/folder/mynote.md?include_backlinks=false"
@@ -97,9 +100,15 @@ POST /api/notes/{note_path}
 Content-Type: application/json
 
 {
-  "content": "# My Note\nNote content here..."
+  "content": "# My Note\nNote content here...",
+  "base_hash": "9f2c…e41a"
 }
 ```
+
+| Field | Required | Description |
+|-------|----------|-------------|
+| `content` | yes | Full note content |
+| `base_hash` | no | `hash` of the version this content was based on. If the file on disk no longer matches it, the note is not saved and `409` is returned. Omit it to always overwrite (previous behavior). |
 
 **Response:**
 ```json
@@ -107,11 +116,20 @@ Content-Type: application/json
   "success": true,
   "path": "test.md",
   "message": "Note created successfully",
-  "content": "# My Note\nNote content here..."
+  "content": "# My Note\nNote content here...",
+  "hash": "51b0…7c3d"
 }
 ```
 
 **Note:** When creating a new note, the `on_note_create` hook is triggered, allowing plugins to modify the initial content. The response includes the potentially modified content.
+
+**Conflict (409):** the note changed on disk since `base_hash` was read (another tab, a sync tool, an AI agent). Nothing is written. The response carries the current hash: `GET` the note to reload it, or send the same content again with that hash to overwrite.
+```json
+{
+  "detail": "Note changed on disk since it was loaded",
+  "hash": "c07d…92b8"
+}
+```
 
 **Linux/Mac:**
 ```bash
@@ -183,6 +201,44 @@ Had a productive meeting about the roadmap.
 **Windows PowerShell:**
 ```powershell
 curl.exe -X PATCH http://localhost:8000/api/notes/daily-journal.md -H "Content-Type: application/json" -d "{\"content\": \"New entry here\", \"add_timestamp\": true}"
+```
+
+### Replace Text in Note
+```http
+POST /api/notes/replace
+Content-Type: application/json
+
+{
+  "path": "projects/alpha.md",
+  "old_str": "Deadline: March",
+  "new_str": "Deadline: April"
+}
+```
+
+Replace one exact occurrence of a text in an existing note, without sending the whole note. `old_str` is matched against the content `GET /api/notes/{note_path}` returns. Nothing is written unless it appears exactly once.
+
+**Parameters:**
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `path` | string | Yes | Path to the existing note |
+| `old_str` | string | Yes | Exact text to replace. Must appear exactly once |
+| `new_str` | string | Yes | Replacement text. An empty string deletes `old_str` |
+
+**Errors:**
+| Status | When |
+|--------|------|
+| `400` | `path` or `old_str` is empty, or `new_str` is missing |
+| `404` | The note does not exist |
+| `409` | `old_str` is not found, or is found more than once |
+
+**Response:**
+```json
+{
+  "success": true,
+  "path": "projects/alpha.md",
+  "message": "Note updated successfully",
+  "hash": "<sha256 of the saved content>"
+}
 ```
 
 ### Move Note
@@ -362,10 +418,11 @@ GET /api/search?q={query}
 GET /api/search?q={query}&limit=10&offset=0
 ```
 
-Matches note contents by case-insensitive substring, so `q=feat` returns notes
-containing "Features". Each result carries the lines that matched. A query of
-fewer than 2 characters returns no results: it would match most of a vault and
-cannot use the search index.
+Matches note contents by case- and accent-insensitive substring, so `q=feat`
+returns notes containing "Features" and `q=esparragos` returns notes containing
+"Espárragos". Snippets keep the text as written. Each result carries the lines
+that matched. A query of fewer than 2 characters returns no results: it would
+match most of a vault and cannot use the search index.
 
 **Optional Pagination:**
 | Parameter | Type | Default | Description |
@@ -453,8 +510,15 @@ GET /api/plugins/note_stats/calculate?content={markdown_content}
 ### Get Note Graph
 ```http
 GET /api/graph
+GET /api/graph?include_system_folders=false
 ```
 Returns the relationship graph between notes with link detection.
+
+**Query parameters:**
+
+| Parameter | Default | Description |
+|-----------|---------|-------------|
+| `include_system_folders` | `true` | When `false`, notes stored under a folder whose name starts with `_` are omitted, along with every edge that starts or ends on one of those notes. `_attachments/readme.md`, `_templates/meeting.md`, and `work/_documentation/intro.md` are the same case. A file named `_draft.md` in a normal folder is still included. Omitting the parameter returns the full graph. |
 
 **Response:**
 ```json

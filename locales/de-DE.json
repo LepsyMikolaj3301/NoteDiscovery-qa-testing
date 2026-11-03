@@ -98,7 +98,12 @@
     "not_found": "Notiz nicht gefunden: {{path}}",
     "create_from_link": "Notiz \"{{path}}\" existiert nicht.\n\nMöchtest du sie erstellen?",
     "no_content": "Kein Inhalt zum Exportieren",
-    "open_first": "Bitte öffne zuerst eine Notiz, bevor du Bilder hochlädst."
+    "open_first": "Bitte öffne zuerst eine Notiz, bevor du Bilder hochlädst.",
+    "save_conflict_title": "Notiz anderswo geändert",
+    "save_conflict_message": "\"{{name}}\" wurde seit dem Öffnen auf der Festplatte geändert: Ein anderer Tab, ein Sync-Tool oder ein KI-Agent hat hineingeschrieben.\n\nNeu laden zeigt die Version auf der Festplatte; deine ungespeicherten Änderungen gehen verloren.\nÜberschreiben speichert deine Version anstelle der anderen.",
+    "save_conflict_overwrite": "Überschreiben",
+    "save_conflict_reload": "Neu laden",
+    "save_conflict_unsaved": "\"{{name}}\": Deine letzten Änderungen wurden nicht gespeichert, die Notiz wurde anderswo geändert."
   },
   "folders": {
     "confirm_delete": "⚠️ WARNUNG ⚠️\n\nBist du sicher, dass du den Ordner \"{{name}}\" löschen möchtest?\n\nDies LÖSCHT DAUERHAFT:\n• Alle Notizen in diesem Ordner\n• Alle Unterordner und deren Inhalte\n\nDiese Aktion kann NICHT rückgängig gemacht werden!",
@@ -280,7 +285,7 @@
     "readable_line_length": "Lesbare Zeilenlänge",
     "readable_line_length_desc": "Vorschaubreite für bessere Lesbarkeit begrenzen",
     "hide_underscore_folders": "Systemordner ausblenden",
-    "hide_underscore_folders_desc": "_attachments, _templates und andere Unterstrich-Ordner ausblenden",
+    "hide_underscore_folders_desc": "_attachments, _templates und andere Unterstrich-Ordner in der Seitenleiste und im Graphen ausblenden",
     "tab_inserts_tab": "Tab-Taste fügt Tab ein",
     "tab_inserts_tab_desc": "Tab drücken, um ein Tabulatorzeichen einzufügen statt den Fokus zu wechseln",
     "new_button_action": "Wenn du auf + klickst",
@@ -291,9 +296,7 @@
     "new_button_option_template": "Neue Notiz aus Vorlage",
     "new_button_option_drawing": "Neue Zeichnung",
     "auto_fill_note_title": "Titel mit Zeitstempel",
-    "auto_fill_note_title_desc": "jjjjmmttHHMMSS. Enter akzeptiert, Tippen ersetzt.",
-    "smart_scroll_sync": "Intelligente Scroll-Sync",
-    "smart_scroll_sync_desc": "Richtet Überschriften, Bilder und Tabellen zwischen den Bereichen aus. Aus: prozentuales Scrollen."
+    "auto_fill_note_title_desc": "jjjjmmttHHMMSS. Enter akzeptiert, Tippen ersetzt."
   },
   "homepage": {
     "title": "Startseite",

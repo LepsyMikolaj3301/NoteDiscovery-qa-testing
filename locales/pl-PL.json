@@ -98,7 +98,12 @@
     "not_found": "Nie znaleziono notatki: {{path}}",
     "create_from_link": "Notatka „{{path}}” nie istnieje.\n\nCzy chcesz ją utworzyć?",
     "no_content": "Brak treści notatki do wyeksportowania",
-    "open_first": "Najpierw otwórz notatkę, aby przesłać obrazy."
+    "open_first": "Najpierw otwórz notatkę, aby przesłać obrazy.",
+    "save_conflict_title": "Notatka zmieniona gdzie indziej",
+    "save_conflict_message": "Notatka „{{name}}” zmieniła się na dysku od czasu jej otwarcia: zapisała do niej inna karta, narzędzie do synchronizacji lub agent AI.\n\nPrzeładuj pokazuje wersję z dysku; niezapisane zmiany zostaną odrzucone.\nNadpisz zapisuje Twoją wersję w miejsce tamtej.",
+    "save_conflict_overwrite": "Nadpisz",
+    "save_conflict_reload": "Przeładuj",
+    "save_conflict_unsaved": "„{{name}}”: ostatnie zmiany nie zostały zapisane, notatka zmieniła się gdzie indziej."
   },
   "folders": {
     "confirm_delete": "⚠️ OSTRZEŻENIE ⚠️\n\nCzy na pewno chcesz usunąć folder „{{name}}”?\n\nTo TRWALE usunie:\n• Wszystkie notatki w tym folderze\n• Wszystkie podfoldery i ich zawartość\n\nTej operacji NIE MOŻNA cofnąć!",
@@ -280,7 +285,7 @@
     "readable_line_length": "Czytelna długość linii",
     "readable_line_length_desc": "Ogranicz szerokość podglądu dla łatwiejszego czytania",
     "hide_underscore_folders": "Ukryj foldery systemowe",
-    "hide_underscore_folders_desc": "Ukryj foldery _attachments, _templates i inne foldery zaczynające się od podkreślenia na pasku bocznym",
+    "hide_underscore_folders_desc": "Ukryj foldery _attachments, _templates i inne foldery zaczynające się od podkreślenia na pasku bocznym i na grafie",
     "tab_inserts_tab": "Klawisz Tab wstawia tabulację",
     "tab_inserts_tab_desc": "Naciśnięcie klawisza Tab wstawia znak tabulacji zamiast zmiany aktywnego elementu",
     "new_button_action": "Akcja po kliknięciu +",
@@ -291,9 +296,7 @@
     "new_button_option_template": "Nowa notatka z szablonu",
     "new_button_option_drawing": "Nowy szkic",
     "auto_fill_note_title": "Automatycznie uzupełnij tytuł znacznikiem czasu",
-    "auto_fill_note_title_desc": "yyyymmddHHMMSS. Naciśnij Enter, aby zaakceptować, lub zacznij pisać, aby zastąpić.",
-    "smart_scroll_sync": "Inteligentna synchronizacja przewijania",
-    "smart_scroll_sync_desc": "Wyrównuje nagłówki, obrazy i tabele między panelami. Po wyłączeniu stosowane jest przewijanie procentowe."
+    "auto_fill_note_title_desc": "yyyymmddHHMMSS. Naciśnij Enter, aby zaakceptować, lub zacznij pisać, aby zastąpić."
   },
   "homepage": {
     "title": "Strona główna",

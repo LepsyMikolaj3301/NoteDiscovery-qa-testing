@@ -1177,6 +1177,72 @@ async def move_note_endpoint(request: Request, data: dict):
         raise HTTPException(status_code=500, detail=safe_error_message(e, "Failed to move note"))
 
 
+# Declared before POST /notes/{note_path:path}, which would otherwise take this
+# request as a save of a note called "replace".
+@api_router.post("/notes/replace", tags=["Notes"])
+@limiter.limit("60/minute")
+async def replace_in_note(request: Request, data: dict):
+    """
+    Replace one exact occurrence of a text in an existing note.
+
+    Lets a client change part of a note without sending the whole file back.
+    Nothing is written unless old_str appears exactly once, so an edit based on
+    a stale copy of the note fails instead of overwriting it.
+
+    Args:
+        data: Dictionary with 'path', 'old_str' and 'new_str' (may be empty to delete)
+    """
+    try:
+        note_path = data.get('path', '')
+        old_str = data.get('old_str', '')
+        new_str = data.get('new_str', '')
+
+        if not note_path:
+            raise HTTPException(status_code=400, detail="path is required")
+        if not isinstance(old_str, str) or not old_str:
+            raise HTTPException(status_code=400, detail="old_str is required")
+        if 'new_str' not in data or not isinstance(new_str, str):
+            raise HTTPException(status_code=400, detail="new_str is required (use an empty string to delete)")
+
+        existing_content = get_note_content(config['storage']['notes_dir'], note_path)
+        if existing_content is None:
+            raise HTTPException(status_code=404, detail="Note not found")
+
+        # Match against the same text GET /notes/{path} returns, so a client can
+        # copy old_str straight from what it read.
+        content = plugin_manager.dispatch('on_note_load', note_path=note_path, content=existing_content)
+
+        occurrences = content.count(old_str)
+        if occurrences == 0:
+            raise HTTPException(status_code=409, detail="old_str not found in note")
+        if occurrences > 1:
+            raise HTTPException(
+                status_code=409,
+                detail=f"old_str found {occurrences} times; include more surrounding text to make it unique"
+            )
+
+        new_content = content.replace(old_str, new_str, 1)
+
+        # Same save path as a regular save
+        transformed_content = plugin_manager.dispatch('on_note_save', note_path=note_path, content=new_content)
+
+        success = save_note(config['storage']['notes_dir'], note_path, transformed_content)
+
+        if not success:
+            raise HTTPException(status_code=500, detail="Failed to save note")
+
+        return {
+            "success": True,
+            "path": note_path,
+            "message": "Note updated successfully",
+            "hash": _content_hash(transformed_content)
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=safe_error_message(e, "Failed to update note"))
+
+
 @api_router.post("/folders/move", tags=["Folders"])
 @limiter.limit("20/minute")
 async def move_folder_endpoint(request: Request, data: dict):
@@ -1496,6 +1562,16 @@ async def list_notes(
         raise HTTPException(status_code=500, detail=safe_error_message(e, "Failed to list notes"))
 
 
+def _content_hash(content: str) -> str:
+    """Fingerprint of a note as stored on disk, for the save conflict check.
+
+    Line endings are normalized the way a text-mode read sees them, so the hash of
+    what a save writes matches the hash of the same file read back later.
+    """
+    normalized = content.replace('\r\n', '\n').replace('\r', '\n')
+    return hashlib.sha256(normalized.encode('utf-8')).hexdigest()
+
+
 @api_router.get("/notes/{note_path:path}", tags=["Notes"])
 async def get_note(note_path: str, include_backlinks: bool = True):
     """Get a specific note's content with optional backlinks"""
@@ -1504,12 +1580,17 @@ async def get_note(note_path: str, include_backlinks: bool = True):
         if content is None:
             raise HTTPException(status_code=404, detail="Note not found")
 
+        # Fingerprint the stored text, before any plugin transforms it: this is
+        # what a later save compares against to detect a write from elsewhere.
+        stored_hash = _content_hash(content)
+
         # Run on_note_load hook (can transform content, e.g., decrypt)
         content = plugin_manager.dispatch('on_note_load', note_path=note_path, content=content)
 
         response = {
             "path": note_path,
             "content": content,
+            "hash": stored_hash,
             "metadata": create_note_metadata(config['storage']['notes_dir'], note_path)
         }
         
@@ -1540,7 +1621,20 @@ async def create_or_update_note(request: Request, note_path: str, content: dict)
         # Check if this is a new note (doesn't exist yet)
         existing_content = get_note_content(config['storage']['notes_dir'], note_path)
         is_new_note = existing_content is None
-        
+
+        # Optional optimistic concurrency check. A client that sends base_hash (the
+        # fingerprint it loaded or last saved) gets a 409 instead of overwriting a
+        # file that something else rewrote in the meantime (another tab, an agent,
+        # a sync tool). Clients that omit it keep the previous last-write-wins.
+        base_hash = content.get('base_hash')
+        if base_hash and not is_new_note:
+            current_hash = _content_hash(existing_content)
+            if current_hash != base_hash:
+                return JSONResponse(status_code=409, content={
+                    "detail": "Note changed on disk since it was loaded",
+                    "hash": current_hash
+                })
+
         # If creating a new note, run on_note_create hook to allow plugins to modify initial content
         if is_new_note:
             note_content = plugin_manager.dispatch(
@@ -1561,7 +1655,8 @@ async def create_or_update_note(request: Request, note_path: str, content: dict)
             "success": True,
             "path": note_path,
             "message": "Note created successfully" if is_new_note else "Note saved successfully",
-            "content": note_content  # Return the (potentially modified) content
+            "content": note_content,  # Return the (potentially modified) content
+            "hash": _content_hash(transformed_content)  # Base for the next save
         }
     except HTTPException:
         raise
@@ -1927,13 +2022,37 @@ async def search(
         raise HTTPException(status_code=500, detail=safe_error_message(e, "Search failed"))
 
 
+def _is_under_system_folder(path: str) -> bool:
+    """True when any parent folder of a vault-relative path starts with '_'.
+
+    Paths use forward slashes. The filename itself does not count, so
+    `_draft.md` in a normal folder is a normal note, while
+    `_attachments/readme.md` and `work/_documentation/intro.md` are system notes.
+    """
+    parent = path.rsplit("/", 1)[0] if "/" in path else ""
+    if not parent or parent == ".":
+        return False
+    return any(part.startswith("_") for part in parent.split("/") if part)
+
+
 @api_router.get("/graph", tags=["Graph"])
-async def get_graph():
-    """Graph data (nodes + resolved wikilink/markdown edges) for the visualizer."""
+async def get_graph(include_system_folders: bool = True):
+    """Graph data (nodes + resolved wikilink/markdown edges) for the visualizer.
+
+    `include_system_folders` defaults to true so existing clients keep the full
+    map. When false, notes under a folder whose name starts with `_` are
+    omitted, along with every edge that starts or ends on one of those notes.
+    """
     try:
         if not note_index.get_index().is_built():
             scan_notes_fast_walk(config['storage']['notes_dir'], include_media=False)
         nodes_paths, edges_tuples = note_index.get_graph_data()
+        if not include_system_folders:
+            nodes_paths = [p for p in nodes_paths if not _is_under_system_folder(p)]
+            edges_tuples = [
+                (s, t, et) for (s, t, et) in edges_tuples
+                if not _is_under_system_folder(s) and not _is_under_system_folder(t)
+            ]
         return {
             "nodes": [{"id": p, "label": Path(p).stem} for p in nodes_paths],
             "edges": [{"source": s, "target": t, "type": et} for (s, t, et) in edges_tuples],
@@ -2286,11 +2405,14 @@ async def catch_all(full_path: str, request: Request):
     if full_path.startswith('api/') or full_path.startswith('static/'):
         raise HTTPException(status_code=404, detail="Not found")
     
-    # Serve index.html with app name injected
+    # Serve index.html with app name and the configured default theme injected.
+    # The head script uses __DEFAULT_THEME__ when the browser has no saved preference.
     index_path = static_path / "index.html"
     async with aiofiles.open(index_path, 'r', encoding='utf-8') as f:
         content = await f.read()
-    return _html_page_response(_render_app_name_html(content), request)
+    content = _render_app_name_html(content)
+    content = content.replace('__DEFAULT_THEME__', DEFAULT_THEME)
+    return _html_page_response(content, request)
 
 
 # ============================================================================

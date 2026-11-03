@@ -98,7 +98,12 @@
     "not_found": "Note introuvable : {{path}}",
     "create_from_link": "La note \"{{path}}\" n'existe pas.\n\nVoulez-vous la créer ?",
     "no_content": "Aucun contenu à exporter",
-    "open_first": "Veuillez d'abord ouvrir une note avant de télécharger des images."
+    "open_first": "Veuillez d'abord ouvrir une note avant de télécharger des images.",
+    "save_conflict_title": "Note modifiée ailleurs",
+    "save_conflict_message": "La note \"{{name}}\" a changé sur le disque depuis son ouverture : un autre onglet, un outil de synchronisation ou un agent IA y a écrit.\n\nRecharger affiche la version du disque ; vos modifications non enregistrées sont abandonnées.\nÉcraser enregistre votre version à la place de la leur.",
+    "save_conflict_overwrite": "Écraser",
+    "save_conflict_reload": "Recharger",
+    "save_conflict_unsaved": "\"{{name}}\" : vos dernières modifications n'ont pas été enregistrées, la note a changé ailleurs."
   },
   "folders": {
     "confirm_delete": "⚠️ ATTENTION ⚠️\n\nÊtes-vous sûr de vouloir supprimer le dossier \"{{name}}\" ?\n\nCeci supprimera DÉFINITIVEMENT :\n• Toutes les notes dans ce dossier\n• Tous les sous-dossiers et leur contenu\n\nCette action est IRRÉVERSIBLE !",
@@ -280,7 +285,7 @@
     "readable_line_length": "Longueur de ligne lisible",
     "readable_line_length_desc": "Limiter la largeur de l'aperçu pour une lecture plus facile",
     "hide_underscore_folders": "Masquer les dossiers système",
-    "hide_underscore_folders_desc": "Masquer _attachments, _templates et autres dossiers préfixés",
+    "hide_underscore_folders_desc": "Masquer _attachments, _templates et autres dossiers préfixés dans la barre latérale et le graphe",
     "tab_inserts_tab": "Tab insère une tabulation",
     "tab_inserts_tab_desc": "Appuyez sur Tab pour insérer une tabulation au lieu de changer le focus",
     "new_button_action": "Quand vous cliquez sur +",
@@ -291,9 +296,7 @@
     "new_button_option_template": "Nouvelle note depuis un modèle",
     "new_button_option_drawing": "Nouveau dessin",
     "auto_fill_note_title": "Titre avec horodatage",
-    "auto_fill_note_title_desc": "aaaammjjHHMMSS. Entrée accepte, tapez pour remplacer.",
-    "smart_scroll_sync": "Synchronisation intelligente",
-    "smart_scroll_sync_desc": "Aligne titres, images et tableaux entre les volets. Désactivé : défilement en pourcentage."
+    "auto_fill_note_title_desc": "aaaammjjHHMMSS. Entrée accepte, tapez pour remplacer."
   },
   "homepage": {
     "title": "Accueil",

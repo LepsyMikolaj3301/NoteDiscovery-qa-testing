@@ -98,7 +98,12 @@
     "not_found": "未找到笔记：{{path}}",
     "create_from_link": "笔记 \"{{path}}\" 不存在。\n\n是否要创建它？",
     "no_content": "没有可导出的笔记内容",
-    "open_first": "请先打开一篇笔记，然后再上传图片。"
+    "open_first": "请先打开一篇笔记，然后再上传图片。",
+    "save_conflict_title": "笔记已在别处修改",
+    "save_conflict_message": "笔记 \"{{name}}\" 在你打开后已在磁盘上被修改：另一个标签页、同步工具或 AI 代理写入了它。\n\n“重新加载”显示磁盘上的版本；未保存的更改将被丢弃。\n“覆盖”用你的版本替换它。",
+    "save_conflict_overwrite": "覆盖",
+    "save_conflict_reload": "重新加载",
+    "save_conflict_unsaved": "\"{{name}}\"：你最后的更改未保存，笔记已在别处修改。"
   },
   "folders": {
     "confirm_delete": "⚠️ 警告 ⚠️\n\n您确定要删除文件夹 \"{{name}}\" 吗？\n\n这将永久删除：\n• 此文件夹内的所有笔记\n• 所有子文件夹及其内容\n\n此操作无法撤销！",
@@ -280,7 +285,7 @@
     "readable_line_length": "可读行宽",
     "readable_line_length_desc": "限制预览宽度以便于阅读",
     "hide_underscore_folders": "隐藏系统文件夹",
-    "hide_underscore_folders_desc": "从侧边栏隐藏 _attachments、_templates 等下划线文件夹",
+    "hide_underscore_folders_desc": "在侧边栏和关系图中隐藏 _attachments、_templates 等下划线文件夹",
     "tab_inserts_tab": "Tab键插入制表符",
     "tab_inserts_tab_desc": "按Tab键插入制表符而不是切换焦点",
     "new_button_action": "点击 + 时",
@@ -291,9 +296,7 @@
     "new_button_option_template": "从模板新建笔记",
     "new_button_option_drawing": "新建绘图",
     "auto_fill_note_title": "用时间戳自动填充标题",
-    "auto_fill_note_title_desc": "yyyymmddHHMMSS。Enter 接受，输入以替换。",
-    "smart_scroll_sync": "智能滚动同步",
-    "smart_scroll_sync_desc": "在两个窗格间对齐标题、图片和表格。关闭时使用百分比滚动。"
+    "auto_fill_note_title_desc": "yyyymmddHHMMSS。Enter 接受，输入以替换。"
   },
   "homepage": {
     "title": "首页",

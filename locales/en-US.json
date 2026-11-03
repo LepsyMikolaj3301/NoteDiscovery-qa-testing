@@ -98,7 +98,12 @@
     "not_found": "Note not found: {{path}}",
     "create_from_link": "Note \"{{path}}\" doesn't exist.\n\nWould you like to create it?",
     "no_content": "No note content to export",
-    "open_first": "Please open a note first before uploading images."
+    "open_first": "Please open a note first before uploading images.",
+    "save_conflict_title": "Note changed elsewhere",
+    "save_conflict_message": "\"{{name}}\" changed on disk since you opened it: another tab, a sync tool or an AI agent wrote to it.\n\nReload shows the version on disk; your unsaved changes are discarded.\nOverwrite saves your version in place of theirs.",
+    "save_conflict_overwrite": "Overwrite",
+    "save_conflict_reload": "Reload",
+    "save_conflict_unsaved": "\"{{name}}\": your last changes were not saved, the note changed elsewhere."
   },
   "folders": {
     "confirm_delete": "⚠️ WARNING ⚠️\n\nAre you sure you want to delete the folder \"{{name}}\"?\n\nThis will PERMANENTLY delete:\n• All notes inside this folder\n• All subfolders and their contents\n\nThis action CANNOT be undone!",
@@ -280,7 +285,7 @@
     "readable_line_length": "Readable line length",
     "readable_line_length_desc": "Limit preview width for easier reading",
     "hide_underscore_folders": "Hide system folders",
-    "hide_underscore_folders_desc": "Hide _attachments, _templates and other underscore folders from sidebar",
+    "hide_underscore_folders_desc": "Hide _attachments, _templates and other underscore folders from the sidebar and the graph",
     "tab_inserts_tab": "Tab key inserts tab",
     "tab_inserts_tab_desc": "Press Tab to insert a tab character instead of changing focus",
     "new_button_action": "When you click +",
@@ -291,9 +296,7 @@
     "new_button_option_template": "New note from template",
     "new_button_option_drawing": "New drawing",
     "auto_fill_note_title": "Auto-fill title with timestamp",
-    "auto_fill_note_title_desc": "yyyymmddHHMMSS. Enter to accept, type to replace.",
-    "smart_scroll_sync": "Smart scroll sync",
-    "smart_scroll_sync_desc": "Aligns headings, images and tables between panes. Off uses percentage scrolling."
+    "auto_fill_note_title_desc": "yyyymmddHHMMSS. Enter to accept, type to replace."
   },
   "homepage": {
     "title": "Home",

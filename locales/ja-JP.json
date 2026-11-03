@@ -98,7 +98,12 @@
     "not_found": "ノートが見つかりません: {{path}}",
     "create_from_link": "ノート「{{path}}」は存在しません。\n\n作成しますか？",
     "no_content": "エクスポートするノートの内容がありません",
-    "open_first": "画像をアップロードする前にノートを開いてください。"
+    "open_first": "画像をアップロードする前にノートを開いてください。",
+    "save_conflict_title": "ノートが別の場所で変更されました",
+    "save_conflict_message": "「{{name}}」は開いた後にディスク上で変更されました（別のタブ、同期ツール、または AI エージェントによる書き込み）。\n\n「再読み込み」はディスク上のバージョンを表示します。未保存の変更は破棄されます。\n「上書き」はあなたのバージョンで置き換えて保存します。",
+    "save_conflict_overwrite": "上書き",
+    "save_conflict_reload": "再読み込み",
+    "save_conflict_unsaved": "「{{name}}」：最後の変更は保存されませんでした。ノートが別の場所で変更されています。"
   },
   "folders": {
     "confirm_delete": "⚠️ 警告 ⚠️\n\n本当にフォルダ「{{name}}」を削除しますか？\n\n以下が完全に削除されます:\n• このフォルダ内のすべてのノート\n• すべてのサブフォルダとその内容\n\nこの操作は元に戻せません！",
@@ -280,7 +285,7 @@
     "readable_line_length": "読みやすい行幅",
     "readable_line_length_desc": "プレビューの幅を制限して読みやすくする",
     "hide_underscore_folders": "システムフォルダを非表示",
-    "hide_underscore_folders_desc": "_attachments、_templatesなどのフォルダをサイドバーから非表示",
+    "hide_underscore_folders_desc": "_attachments、_templatesなどのフォルダをサイドバーとグラフから非表示",
     "tab_inserts_tab": "Tabキーでタブを挿入",
     "tab_inserts_tab_desc": "Tabキーでフォーカス移動ではなくタブ文字を挿入",
     "new_button_action": "+ をクリックしたとき",
@@ -291,9 +296,7 @@
     "new_button_option_template": "テンプレートから新規ノート",
     "new_button_option_drawing": "新規お絵描き",
     "auto_fill_note_title": "タイトルに日時を自動入力",
-    "auto_fill_note_title_desc": "yyyymmddHHMMSS。Enterで確定、入力で置換。",
-    "smart_scroll_sync": "スマートスクロール同期",
-    "smart_scroll_sync_desc": "見出し・画像・表をペイン間で揃えます。オフの場合は割合ベースのスクロール。"
+    "auto_fill_note_title_desc": "yyyymmddHHMMSS。Enterで確定、入力で置換。"
   },
   "homepage": {
     "title": "ホーム",

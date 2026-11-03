@@ -47,26 +47,26 @@
         })();
     </script>
     
-    <!-- Theme styles will be loaded dynamically -->
+    <!-- Preload the theme before first paint (same approach as index.html).
+         data-theme is set only after the CSS is parsed and inserted. -->
     <script>
-        // Load theme immediately (same approach as index.html)
-        (async function() {
-            const savedTheme = localStorage.getItem('noteDiscoveryTheme') || '__DEFAULT_THEME__';
-            
+        (function() {
             try {
-                const response = await fetch(`/api/themes/${savedTheme}`);
-                const data = await response.json();
-                
-                // Create style element with theme CSS
+                const themeId = localStorage.getItem('noteDiscoveryTheme') || '__DEFAULT_THEME__';
+                if (!themeId) return;
+                const xhr = new XMLHttpRequest();
+                xhr.open('GET', '/api/themes/' + encodeURIComponent(themeId), false);
+                xhr.send();
+                if (xhr.status !== 200) return;
+                const css = JSON.parse(xhr.responseText).css;
+                if (typeof css !== 'string' || !css) return;
                 const styleEl = document.createElement('style');
                 styleEl.id = 'dynamic-theme';
-                styleEl.textContent = data.css;
+                styleEl.textContent = css;
                 document.head.appendChild(styleEl);
-                
-                // Set data attribute for theme-specific selectors
-                document.documentElement.setAttribute('data-theme', savedTheme);
-            } catch (error) {
-                console.error('Failed to load theme:', error);
+                document.documentElement.setAttribute('data-theme', themeId);
+            } catch (e) {
+                console.error('Failed to preload theme:', e);
             }
         })();
     </script>

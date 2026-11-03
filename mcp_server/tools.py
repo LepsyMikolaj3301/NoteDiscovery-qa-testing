@@ -201,6 +201,28 @@ TOOLS: list[dict[str, Any]] = [
         }
     },
     {
+        "name": "edit_note",
+        "description": "Edit part of an existing note by replacing one exact piece of text, without resending the whole note. old_str must match the note content (as returned by get_note) exactly once, including whitespace and line breaks; otherwise nothing is written. To edit a section, include its heading in old_str. Prefer this over create_note for changes to existing notes.",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "path": {
+                    "type": "string",
+                    "description": "Path to the existing note"
+                },
+                "old_str": {
+                    "type": "string",
+                    "description": "Exact text to replace. Must appear exactly once in the note; add surrounding lines if needed to make it unique."
+                },
+                "new_str": {
+                    "type": "string",
+                    "description": "Replacement text. Use an empty string to delete old_str."
+                }
+            },
+            "required": ["path", "old_str", "new_str"]
+        }
+    },
+    {
         "name": "move_note",
         "description": "Move or rename a note to a different path. Use this to reorganize notes or rename them.",
         "inputSchema": {

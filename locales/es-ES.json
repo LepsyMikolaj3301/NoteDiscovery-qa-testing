@@ -98,7 +98,12 @@
     "not_found": "Nota no encontrada: {{path}}",
     "create_from_link": "La nota \"{{path}}\" no existe.\n\n¿Desea crearla?",
     "no_content": "No hay contenido para exportar",
-    "open_first": "Por favor, abre una nota antes de subir imágenes."
+    "open_first": "Por favor, abre una nota antes de subir imágenes.",
+    "save_conflict_title": "Nota modificada en otro lugar",
+    "save_conflict_message": "\"{{name}}\" ha cambiado en el disco desde que la abriste: otra pestaña, una herramienta de sincronización o un agente de IA ha escrito en ella.\n\nRecargar muestra la versión del disco; tus cambios sin guardar se descartan.\nSobrescribir guarda tu versión en lugar de la suya.",
+    "save_conflict_overwrite": "Sobrescribir",
+    "save_conflict_reload": "Recargar",
+    "save_conflict_unsaved": "\"{{name}}\": tus últimos cambios no se guardaron, la nota cambió en otro lugar."
   },
   "folders": {
     "confirm_delete": "⚠️ ADVERTENCIA ⚠️\n\n¿Estás seguro de que quieres eliminar la carpeta \"{{name}}\"?\n\nEsto eliminará PERMANENTEMENTE:\n• Todas las notas dentro de esta carpeta\n• Todas las subcarpetas y su contenido\n\n¡Esta acción NO se puede deshacer!",
@@ -280,7 +285,7 @@
     "readable_line_length": "Longitud de línea legible",
     "readable_line_length_desc": "Limitar el ancho de vista previa para facilitar la lectura",
     "hide_underscore_folders": "Ocultar carpetas de sistema",
-    "hide_underscore_folders_desc": "Ocultar _attachments, _templates y otras carpetas con guion bajo",
+    "hide_underscore_folders_desc": "Ocultar _attachments, _templates y otras carpetas con guion bajo en la barra lateral y en el grafo",
     "tab_inserts_tab": "Tabulador inserta tabulación",
     "tab_inserts_tab_desc": "Pulsa Tab para insertar un tabulador en lugar de cambiar el foco",
     "new_button_action": "Cuando haces clic en +",
@@ -291,9 +296,7 @@
     "new_button_option_template": "Nueva nota desde plantilla",
     "new_button_option_drawing": "Nuevo dibujo",
     "auto_fill_note_title": "Título con marca de tiempo",
-    "auto_fill_note_title_desc": "aaaammddHHMMSS. Intro acepta, escribe para reemplazar.",
-    "smart_scroll_sync": "Sincronización inteligente",
-    "smart_scroll_sync_desc": "Alinea encabezados, imágenes y tablas entre paneles. Desactivado: desplazamiento por porcentaje."
+    "auto_fill_note_title_desc": "aaaammddHHMMSS. Intro acepta, escribe para reemplazar."
   },
   "homepage": {
     "title": "Inicio",

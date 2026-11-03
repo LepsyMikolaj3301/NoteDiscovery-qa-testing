@@ -98,7 +98,12 @@
     "not_found": "Nem található jegyzet: {{path}}",
     "create_from_link": "Jegyzet a(z) \"{{path}}\" nemlétezik.\n\nSzeretnéd létrehozni?",
     "no_content": "Nincs exportálható jegyzettartalom",
-    "open_first": "Kérlek előbb nyiss meg egy jegyzetet, mielőtt képeket töltenél fel."
+    "open_first": "Kérlek előbb nyiss meg egy jegyzetet, mielőtt képeket töltenél fel.",
+    "save_conflict_title": "A jegyzet máshol módosult",
+    "save_conflict_message": "A(z) \"{{name}}\" jegyzet megváltozott a lemezen, mióta megnyitottad: egy másik lap, egy szinkronizáló eszköz vagy egy MI-ügynök írt bele.\n\nAz Újratöltés a lemezen lévő verziót mutatja; a nem mentett módosításaid elvesznek.\nA Felülírás a te verziódat menti az övék helyett.",
+    "save_conflict_overwrite": "Felülírás",
+    "save_conflict_reload": "Újratöltés",
+    "save_conflict_unsaved": "\"{{name}}\": a legutóbbi módosításaid nem lettek mentve, a jegyzet máshol módosult."
   },
   "folders": {
     "confirm_delete": "⚠️ FIGYELMEZTETÉS ⚠️\n\nBiztosan törölni szeretnéd a(z) \"{{name}}\" mappát?\n\nEz VÉGLEGESEN törli a következőket:\n• A mappában található összes jegyzet\n• Az összes almappa és azok tartalma \n\nEz a művelet NEM vonható vissza!",
@@ -280,7 +285,7 @@
     "readable_line_length": "Olvasható sorhossz",
     "readable_line_length_desc": "Korlátozd az előnézeti szélességet a könnyebb olvasás érdekében",
     "hide_underscore_folders": "Rendszermappák elrejtése",
-    "hide_underscore_folders_desc": "_attachments, _templates és más aláhúzásos mappák elrejtése",
+    "hide_underscore_folders_desc": "_attachments, _templates és más aláhúzásos mappák elrejtése az oldalsávról és a gráfról",
     "tab_inserts_tab": "Tab billentyű több helyet hagy a szövegben",
     "tab_inserts_tab_desc": "Nyomd meg a Tab-ot, hogy több helyet hagyj a szövegben a fókuszváltás helyett",
     "new_button_action": "A + gombra kattintva",
@@ -291,9 +296,7 @@
     "new_button_option_template": "Új jegyzet sablonból",
     "new_button_option_drawing": "Új rajz",
     "auto_fill_note_title": "Cím kitöltése időbélyeggel",
-    "auto_fill_note_title_desc": "éééé.hh.nn.ÓÓ.PP.MM.",
-    "smart_scroll_sync": "Intelligens görgetés",
-    "smart_scroll_sync_desc": "Összehangolja a címsorokat, képeket és táblázatokat a panelek között. Kikapcsolva: százalékos görgetés."
+    "auto_fill_note_title_desc": "éééé.hh.nn.ÓÓ.PP.MM."
   },
   "homepage": {
     "title": "Főoldal",

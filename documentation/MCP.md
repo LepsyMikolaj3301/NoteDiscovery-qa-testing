@@ -200,6 +200,7 @@ The MCP server provides these tools to AI assistants:
 |------|-------------|
 | `create_note` | Create or update a note |
 | `append_to_note` | Append content to an existing note (great for journals/logs) |
+| `edit_note` | Replace one exact piece of text in an existing note |
 | `move_note` | Move or rename a note |
 | `delete_note` | Delete a note |
 | `create_folder` | Create a new folder |
@@ -268,6 +269,22 @@ Append content to an existing note without overwriting. Perfect for journals, lo
 | `add_timestamp` | boolean | No | Add timestamp header before content |
 
 **Example prompt:** "Add this meeting summary to my daily-journal.md with a timestamp"
+
+---
+
+### `edit_note`
+
+Change part of an existing note without resending the whole file. The text in `old_str` must appear exactly once in the note (as `get_note` returns it), including whitespace and line breaks. If it is missing or appears more than once, nothing is written.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `path` | string | Yes | Path to existing note |
+| `old_str` | string | Yes | Exact text to replace (must be unique in the note) |
+| `new_str` | string | Yes | Replacement text (empty string deletes `old_str`) |
+
+To edit a section, include its heading in `old_str`.
+
+**Example prompt:** "In project-alpha.md, change the deadline from March to April"
 
 ---
 

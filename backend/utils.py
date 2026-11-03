@@ -12,9 +12,11 @@ import shutil
 import threading
 import time
 import traceback
+import unicodedata
 import urllib.parse
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
+from functools import lru_cache
 from pathlib import Path
 from typing import List, Dict, Optional, Tuple, Any, TypeVar, Callable
 from datetime import datetime, timezone
@@ -753,11 +755,57 @@ def delete_note(notes_dir: str, note_path: str) -> bool:
     return True
 
 
+@lru_cache(maxsize=4096)
+def _fold_char(ch: str) -> str:
+    return note_index.fold_for_search(ch)
+
+
+def _folded_match_spans(content: str, folded_query: str, limit: int) -> List[Tuple[int, int]]:
+    """Find folded_query in the folded content and return up to `limit`
+    (start, end) spans in the original content, so snippets keep the text as
+    written, accents included.
+
+    Folding can change the length of the text ("é" may be stored as "e" plus a
+    combining accent), so each folded character remembers which original
+    character it came from."""
+    if content.isascii():
+        # casefold() and lower() agree on ASCII, and the length stays the same
+        folded, origin = content.lower(), None
+    else:
+        parts: List[str] = []
+        origin = []
+        for i, ch in enumerate(content):
+            folded_ch = _fold_char(ch)
+            parts.append(folded_ch)
+            origin.extend([i] * len(folded_ch))
+        folded = "".join(parts)
+
+    spans: List[Tuple[int, int]] = []
+    pos = folded.find(folded_query)
+    while pos != -1 and len(spans) < limit:
+        end = pos + len(folded_query)
+        if origin is None:
+            spans.append((pos, end))
+        else:
+            start, stop = origin[pos], origin[end - 1] + 1
+            # Keep a combining accent with the letter it belongs to
+            while stop < len(content) and unicodedata.combining(content[stop]):
+                stop += 1
+            spans.append((start, stop))
+        pos = folded.find(folded_query, end)
+    return spans
+
+
 def search_notes(notes_dir: str, query: str) -> List[Dict]:
     """Full-text search through note contents. Narrow the candidate set via
-    the inverted index, then run the snippet extractor on each candidate."""
+    the inverted index, then run the snippet extractor on each candidate.
+    Matching ignores case and accents: "esparragos" finds "Espárragos"."""
     from html import escape
     results: List[Dict] = []
+
+    folded_query = note_index.fold_for_search(query)
+    if not folded_query:
+        return results
 
     ensure_index_built(notes_dir)
     note_index.ensure_search_index(notes_dir)
@@ -782,15 +830,13 @@ def search_notes(notes_dir: str, query: str) -> List[Dict]:
             with open(md_file, 'r', encoding='utf-8') as f:
                 content = f.read()
 
-            matches = list(re.finditer(re.escape(query), content, re.IGNORECASE))
-            if not matches:
+            spans = _folded_match_spans(content, folded_query, 3)
+            if not spans:
                 continue
 
             matched_lines = []
-            for match in matches[:3]:
-                start_index = match.start()
-                end_index = match.end()
-                matched_text = match.group()
+            for start_index, end_index in spans:
+                matched_text = content[start_index:end_index]
 
                 context_start = max(0, start_index - 15)
                 context_end = min(len(content), end_index + 15)

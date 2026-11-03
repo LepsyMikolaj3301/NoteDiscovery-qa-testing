@@ -16,6 +16,7 @@ import os
 import re
 import threading
 import time
+import unicodedata
 import urllib.parse
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
@@ -31,8 +32,9 @@ _PARALLEL_CUTOFF = 50
 _PARALLEL_WORKERS = min(8, (os.cpu_count() or 4))
 
 # Search tokenization. Min length 2 keeps single-letter noise out without
-# losing common short queries like "go", "ai".
-_SEARCH_TOKEN_RE = re.compile(r"[A-Za-z0-9_\-]{2,}")
+# losing common short queries like "go", "ai". \w takes accented and other
+# non-Latin letters as letters, so "espárragos" stays one word.
+_SEARCH_TOKEN_RE = re.compile(r"[\w\-]{2,}")
 
 WIKILINK_RE = re.compile(r'\[\[([^\]|]+)(?:\|[^\]]+)?\]\]')
 MDLINK_RE = re.compile(r'\[([^\]]+)\]\((?!https?://|mailto:|#|data:)([^\)]+)\)')
@@ -45,9 +47,21 @@ def extract_links_from_content(content: str) -> Dict[str, List[str]]:
     return {"wikilinks": wikilinks, "mdlinks": mdlinks}
 
 
+def fold_for_search(text: str) -> str:
+    """Lowercase and drop accents, so "Espárragos" and "esparragos" compare
+    equal. The indexed words, the query and the final match all go through
+    this, or a query typed without accents would miss on one side.
+
+    casefold() rather than lower(): lower() depends on context (a Greek "Σ"
+    becomes "ς" only at the end of a word), so folding a whole query and
+    folding a note one character at a time would disagree."""
+    decomposed = unicodedata.normalize("NFD", text.casefold())
+    return "".join(ch for ch in decomposed if not unicodedata.combining(ch))
+
+
 def extract_search_terms(content: str) -> Set[str]:
     """Tokenize content for the inverted search index."""
-    return {m.group(0).lower() for m in _SEARCH_TOKEN_RE.finditer(content)}
+    return {m.group(0) for m in _SEARCH_TOKEN_RE.finditer(fold_for_search(content))}
 
 
 @dataclass
@@ -490,7 +504,7 @@ class NoteIndex:
         only such runs ("b c") has to fall back to reading the vault."""
         if not self._search_built:
             return None
-        tokens = [m.group(0).lower() for m in _SEARCH_TOKEN_RE.finditer(query)]
+        tokens = [m.group(0) for m in _SEARCH_TOKEN_RE.finditer(fold_for_search(query))]
         if not tokens:
             return None
 
