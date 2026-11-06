@@ -197,6 +197,10 @@ def live_server(vault):
         if time.monotonic() > deadline or not thread.is_alive():
             raise RuntimeError("live_server did not start")
         time.sleep(0.05)
+    # The startup warmup scans the (empty) vault; let it finish before a test seeds notes
+    for t in threading.enumerate():
+        if t.name == "note-index-warmup":
+            t.join(timeout=5)
 
     yield LiveServer(f"http://127.0.0.1:{port}", vault)
 
